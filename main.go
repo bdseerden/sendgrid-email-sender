@@ -15,7 +15,7 @@ func main() {
 	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading .env file: %s", err)
 	}
 
 	sendgridAPIKey := os.Getenv("SENDGRID_API_KEY")
@@ -64,6 +64,7 @@ func sendEmail(apiKey, templateID, fromEmail, toEmail string, dynamicData map[st
 	to := mail.NewEmail("Recipient", toEmail)
 	message := mail.NewSingleEmail(from, subject, to, content, "")
 	message.SetTemplateID(templateID)
+
 	for key, value := range dynamicData {
 		message.Personalizations[0].SetDynamicTemplateData(key, value)
 	}
@@ -71,8 +72,11 @@ func sendEmail(apiKey, templateID, fromEmail, toEmail string, dynamicData map[st
 	client := sendgrid.NewSendClient(apiKey)
 	response, err := client.Send(message)
 	if err != nil {
-		return err
+		return fmt.Errorf("error sending email: %v", err)
 	}
-	fmt.Printf("Email sent to %s with status code %d\n", toEmail, response.StatusCode)
+
+	// Log status code and full response body
+	log.Printf("Email sent to %s with status code %d. Response: %+v\n", toEmail, response.StatusCode, response)
+
 	return nil
 }
