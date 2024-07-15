@@ -22,10 +22,8 @@ func main() {
 	templateID := os.Getenv("TEMPLATE_ID")
 	fromEmail := os.Getenv("FROM_EMAIL")
 	csvFile := os.Getenv("CSV_FILE")
-	emailSubject := os.Getenv("EMAIL_SUBJECT")
-	emailContent := os.Getenv("EMAIL_CONTENT")
 
-	if sendgridAPIKey == "" || templateID == "" || fromEmail == "" || csvFile == "" || emailSubject == "" || emailContent == "" {
+	if sendgridAPIKey == "" || templateID == "" || fromEmail == "" || csvFile == "" {
 		log.Fatalf("Environment variables not set correctly")
 	}
 
@@ -53,21 +51,25 @@ func main() {
 		}
 
 		toEmail := dynamicData["email"]
-		if err := sendEmail(sendgridAPIKey, templateID, fromEmail, toEmail, dynamicData, emailSubject, emailContent); err != nil {
+		if err := sendEmail(sendgridAPIKey, templateID, fromEmail, toEmail, dynamicData); err != nil {
 			log.Printf("Failed to send email to %s: %s", toEmail, err)
 		}
 	}
 }
 
-func sendEmail(apiKey, templateID, fromEmail, toEmail string, dynamicData map[string]string, subject, content string) error {
+func sendEmail(apiKey, templateID, fromEmail, toEmail string, dynamicData map[string]string) error {
 	from := mail.NewEmail("Example User", fromEmail)
-	to := mail.NewEmail("Recipient", toEmail)
-	message := mail.NewSingleEmail(from, subject, to, content, "")
+	to := mail.NewEmail(toEmail, toEmail)
+	message := mail.NewV3Mail()
+	message.SetFrom(from)
 	message.SetTemplateID(templateID)
 
+	personalization := mail.NewPersonalization()
+	personalization.AddTos(to)
 	for key, value := range dynamicData {
-		message.Personalizations[0].SetDynamicTemplateData(key, value)
+		personalization.SetDynamicTemplateData(key, value)
 	}
+	message.AddPersonalizations(personalization)
 
 	client := sendgrid.NewSendClient(apiKey)
 	response, err := client.Send(message)
