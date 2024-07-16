@@ -15,8 +15,6 @@ This Go script sends SendGrid dynamic template emails. It reads recipient data f
      TEMPLATE_ID=your_template_id
      FROM_EMAIL=your_email@example.com
      CSV_FILE=emails.csv
-     EMAIL_SUBJECT=Your Dynamic Template Email Subject
-     EMAIL_CONTENT=Hello, {{name}}! This is a dynamic template email.
      ```
 
 2. **CSV File Format**:
