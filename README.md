@@ -34,5 +34,3 @@ SENDGRID_API_KEY=your_sendgrid_api_key
 TEMPLATE_ID=your_template_id
 FROM_EMAIL=your_email@example.com
 CSV_FILE=emails.csv
-EMAIL_SUBJECT=Your Dynamic Email Subject
-EMAIL_CONTENT=Hello, {{name}}! This is a dynamic email.
